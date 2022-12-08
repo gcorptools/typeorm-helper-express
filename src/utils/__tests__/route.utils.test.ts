@@ -1,6 +1,11 @@
 import {
   defaultExternalEndpointConfig,
+  disabledEndpoint,
+  enableSoftDelete,
+  ownerGlobalWhere,
   toBuilderConfig,
+  toDtoAfterQuery,
+  toDtoEndpointConfig,
   toExternalEndpointConfig
 } from '..';
 import { Request, NextFunction } from 'express';
@@ -9,6 +14,10 @@ import {
   EndpointConfig,
   ExternalEndpointConfig
 } from '../../types';
+import { GenericDto } from '../../dtos';
+import { GenericModel } from '../../models';
+import { Page } from '@gcorptools/typeorm-helper';
+import { FindOperator, FindOptionsWhere, IsNull } from 'typeorm';
 
 describe('Route utils', () => {
   const request = {} as Request;
@@ -188,4 +197,91 @@ describe('Route utils', () => {
     }
     return true;
   };
+
+  it('should return true for enableSoftDelete', async () => {
+    expect(await enableSoftDelete(global.mockRequest as Request, null)).toEqual(
+      true
+    );
+  });
+
+  it('should return disabled for disabledEndpoint', async () => {
+    expect(disabledEndpoint()).toEqual({ disabled: true });
+  });
+
+  it('should transform objects to DTO', async () => {
+    const record: SampleModel = Object.assign(new SampleModel(), {
+      id: 1,
+      name: 'record-1'
+    });
+    const dto = await toDtoAfterQuery<SampleDto, SampleModel>(
+      SampleDto,
+      record,
+      null
+    );
+    expect(dto instanceof SampleDto).toEqual(true);
+    expect(dto.name).toEqual(record.name);
+
+    const records: SampleModel[] = [record, record];
+    const dtos = await toDtoAfterQuery<SampleDto, SampleModel>(
+      SampleDto,
+      records,
+      true
+    );
+    expect(dtos.length).toEqual(records.length);
+    dtos.forEach((d: SampleDto) => {
+      expect(d instanceof SampleDto).toEqual(true);
+      expect(d.name).toEqual(record.name);
+    });
+
+    const page: Page<SampleModel> = {
+      page: 1,
+      size: 2,
+      count: 2,
+      data: records,
+      totalPages: 2,
+      totalElements: 3
+    };
+    const pageDto = await toDtoAfterQuery<SampleDto, SampleModel>(
+      SampleDto,
+      page,
+      {}
+    );
+    expect(pageDto.totalElements).toEqual(page.totalElements);
+  });
+
+  it('should return safe config for toDtoEndpointConfig', async () => {
+    const { afterQuery } = toDtoEndpointConfig<SampleDto, SampleModel>(
+      SampleDto
+    );
+    const record: SampleModel = Object.assign(new SampleModel(), {
+      id: 1,
+      name: 'record'
+    });
+    const dto = await afterQuery!(record, null);
+    expect(dto instanceof SampleDto).toEqual(true);
+    expect(dto.name).toEqual(record.name);
+  });
+
+  it('should return options when user is owner for ownerGlobalWhere', async () => {
+    let req = global.mockRequest as Request;
+    const currentUserOptions: FindOptionsWhere<SampleModel> = {
+      id: 1
+    };
+    let options = await ownerGlobalWhere<SampleModel>(req, currentUserOptions);
+    expect(options.id instanceof FindOperator).toEqual(true);
+
+    Object.assign(req, { currentUser: { id: 'a' } });
+    options = await ownerGlobalWhere<SampleModel>(req, currentUserOptions);
+    expect(options).toEqual(currentUserOptions);
+  });
 });
+
+class SampleModel extends GenericModel {
+  id!: number;
+  name!: string;
+}
+
+class SampleDto extends GenericDto {
+  id!: number;
+  name!: string;
+}
