@@ -1,5 +1,4 @@
 export * from './generic.dto';
-export * from './credentials-token.dto';
 
 // The following comments are useful for swagger parsing
 /**
