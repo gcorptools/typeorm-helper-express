@@ -1,19 +1,15 @@
 import { Application } from 'express';
 import expressJSDocSwagger from 'express-jsdoc-swagger';
 import EventEmitter from 'events';
-import path from 'path';
-import { writeFileSync } from 'fs';
 
 /**
  * Generate JSON file
  * @param app express application
- * @param targetFile output JSON file (without extension)
  * @param options swagger options
  * @param oldSwagger old swagger config (from a previously generated JSON file for example)
  */
 export const generateSwaggerJson = (
   app: Application,
-  targetFile: string = 'swagger',
   options: any = {},
   oldSwagger: any = {}
 ): Promise<any> => {
@@ -50,10 +46,6 @@ export const generateSwaggerJson = (
     listener
       .on('error', (e) => eventEmitter.emit('error', e))
       .on('finish', (e) => {
-        if (!targetFile) {
-          eventEmitter.emit('error', new Error('No target file provided'));
-          return;
-        }
         eventEmitter.emit('complete', { components: e.components });
       });
 
@@ -67,8 +59,6 @@ export const generateSwaggerJson = (
 
     eventEmitter.on('complete', (r) => {
       console.log('Docs successfully generated!');
-      const filePath = path.join(__dirname, `${targetFile}.json`);
-      writeFileSync(filePath, JSON.stringify(r));
       server.close();
       resolve(r);
     });
