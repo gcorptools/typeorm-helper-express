@@ -546,6 +546,16 @@ export class RouteBuilder<T extends BaseModel> {
       return;
     }
 
+    const { found, records } = await this._checkLoadBeforeDelete(
+      config,
+      resultData,
+      next
+    );
+    if (!found) {
+      // Error already thrown
+      return;
+    }
+    const finalData = !!records ? { ...savedData, records } : savedData;
     // 2- Remove data from database
     const softDelete = await config.softDelete(req, resultData);
     let deleteResult: DeleteResult;
@@ -556,7 +566,24 @@ export class RouteBuilder<T extends BaseModel> {
     }
 
     // 3- Execute some late method or transform record before sending
-    const result = await config.afterQuery(deleteResult, savedData);
+    const result = await config.afterQuery(deleteResult, finalData);
     res.status(200).send(result);
+  }
+
+  private async _checkLoadBeforeDelete(
+    config: EndpointConfig<T>,
+    options: any,
+    next: NextFunction
+  ) {
+    // 1 check load before deleted
+    if (!config.loadBeforeDelete) {
+      return { found: true, records: null };
+    }
+    const records = await this._getRepository().findBy(options);
+    if (!records || records.length === 0) {
+      next(new NotFoundError());
+      return { found: false, records: null };
+    }
+    return { found: true, records };
   }
 }

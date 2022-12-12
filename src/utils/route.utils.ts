@@ -28,6 +28,7 @@ export const defaultExternalEndpointConfig = <T>(
     path,
     disabled: false,
     middleWares: [],
+    loadBeforeDelete: false,
     beforeQuery: async (
       req: Request,
       next: NextFunction,

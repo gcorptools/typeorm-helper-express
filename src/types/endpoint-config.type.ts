@@ -109,6 +109,11 @@ export type ExternalEndpointConfig<T> = {
    * For delete operation, decide if it must be soft deleted or hard
    */
   softDelete: (req: Request, resultData?: any) => Promise<boolean>;
+  /**
+   * For delete operation, decide if it must we must first load data from database
+   * If enabled and no result returned by loading, return a 404 error
+   */
+  loadBeforeDelete: boolean;
 };
 
 /**

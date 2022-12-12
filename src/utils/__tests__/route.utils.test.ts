@@ -182,7 +182,7 @@ describe('Route utils', () => {
     path: string,
     hasInternal: boolean = false
   ): boolean => {
-    const fieldsNumber = hasInternal ? 9 : 7;
+    const fieldsNumber = hasInternal ? 10 : 8;
     expect(config).toBeDefined();
     expect(config.path).toEqual(path);
     expect(config.middleWares).toBeDefined();

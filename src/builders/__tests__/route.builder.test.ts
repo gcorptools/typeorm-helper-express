@@ -488,6 +488,35 @@ describe('Route builder', () => {
     );
   });
 
+  it('should return error when deleting unknown records if option enabled', async () => {
+    const root = '/deletion';
+    const builder = new RouteBuilder<FakeModel>(root, () => fakeRepository, {
+      deleteById: {
+        loadBeforeDelete: true
+      }
+    });
+    const router = builder.build();
+    expect(router).toBeDefined();
+
+    const app: Application = express();
+    app.set('trust proxy', true);
+    app.use(json());
+    app.use(router);
+    app.use(errorHandler);
+
+    backup.restore(); // Because we want IDs to start at 1
+
+    // Get page is not disabled
+    const url = `${root}/1`;
+    let response = await request(app).delete(url);
+    expect(response.status).toEqual(404);
+
+    // Create some records
+    await createRecords(10);
+    response = await request(app).delete(url);
+    expect(response.status).toEqual(200);
+  });
+
   beforeAll(async () => {
     // 1- Building database
     db = newDb({
@@ -639,7 +668,8 @@ describe('Route builder', () => {
         beforeQuery: restriction
       },
       deleteById: {
-        beforeQuery: restriction
+        beforeQuery: restriction,
+        loadBeforeDelete: true // Should impact results
       },
       deleteByIds: {
         beforeQuery: restriction

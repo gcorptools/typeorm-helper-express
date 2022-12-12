@@ -17,6 +17,6 @@ utils
       '../src/types/**/*.ts'
     ]
   })
-  .then((result: any) => {
+  .then((result) => {
     fs.writeFileSync(targetFile, JSON.stringify(result));
   });

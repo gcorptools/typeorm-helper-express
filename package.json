@@ -12,12 +12,12 @@
     "build/**/*"
   ],
   "scripts": {
-    "clean": "yarn del build --force",
-    "build": "yarn clean && tsc",
     "test": "jest --watchAll --no-cache",
     "coverage": "jest --watchAll --no-cache --coverage",
+    "clean": "node_modules/.bin/del \"build\" --force",
     "format": "prettier --config .prettierrc src/**/*.ts src/**/*.json --write",
-    "swagger": "ts-node-dev ./scripts/generate-swagger.ts"
+    "swagger": "ts-node-dev ./scripts/generate-swagger.js",
+    "build": "npm run clean && npm run swagger && npm run format && tsc"
   },
   "dependencies": {
     "@gcorptools/typeorm-helper": "^0.0.17",
