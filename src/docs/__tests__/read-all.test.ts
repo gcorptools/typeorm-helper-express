@@ -1,5 +1,5 @@
 import request from 'supertest';
-import { app, getUserCookie, newCountries, COUNTRIES } from '../index';
+import { app, getUserAuthorization, newCountries, COUNTRIES } from '../index';
 
 describe('Read All Country Route', () => {
   let url: string;

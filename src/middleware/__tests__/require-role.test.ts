@@ -36,7 +36,7 @@ describe('Require role', () => {
     global.mockRequest.currentUser = {
       id: '1',
       username: 'an-email@mail.com',
-      role: UserRole.ADMINISTRATOR
+      roles: [UserRole.ADMINISTRATOR]
     } as UserCredentials;
 
     await requireRole([UserRole.ADMINISTRATOR])(
@@ -49,13 +49,37 @@ describe('Require role', () => {
     global.mockRequest.currentUser = {
       id: '1',
       username: 'an-email@mail.com',
-      role: UserRole.CUSTOMER
+      roles: [UserRole.CUSTOMER]
     } as UserCredentials;
     await requireRole([UserRole.ADMINISTRATOR])(
       global.mockRequest as Request,
       global.mockResponse as Response,
       global.nextFunction
     );
+    expect(global.nextFunction).toHaveBeenCalledWith(new ForbiddenError());
+  });
+
+  it('should apply strict rules when requested', async () => {
+    global.mockRequest.currentUser = {
+      id: '1',
+      username: 'an-email@mail.com',
+      roles: [UserRole.CUSTOMER, UserRole.ADMINISTRATOR, 'UNKNOWN']
+    } as UserCredentials;
+
+    await requireRole([UserRole.ADMINISTRATOR, UserRole.CUSTOMER])(
+      global.mockRequest as Request,
+      global.mockResponse as Response,
+      global.nextFunction
+    );
+    // Because at least one role is in allowed roles
+    expect(global.nextFunction).not.toHaveBeenCalledWith(new ForbiddenError());
+
+    await requireRole([UserRole.ADMINISTRATOR, UserRole.CUSTOMER], true)(
+      global.mockRequest as Request,
+      global.mockResponse as Response,
+      global.nextFunction
+    );
+    // Because UNKNOWN role is not allowed
     expect(global.nextFunction).toHaveBeenCalledWith(new ForbiddenError());
   });
 });

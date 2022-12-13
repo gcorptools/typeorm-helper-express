@@ -5,7 +5,7 @@ import {
   COUNTRIES,
   countryRepository,
   UserRole,
-  getUserCookie
+  getUserAuthorization
 } from '../index';
 
 describe('Delete all Countries Route', () => {
@@ -21,14 +21,14 @@ describe('Delete all Countries Route', () => {
   });
 
   it('should not allow non administrators', async () => {
-    const { token } = await getUserCookie();
+    const { token } = await getUserAuthorization();
     const response = await request(app).delete(URL).set('authorization', token);
     expect(response.status).toEqual(403);
   });
 
   it('should allow deletion by administrator', async () => {
     const countries = await newCountries(10);
-    const { token: administratorToken } = await getUserCookie(
+    const { token: administratorToken } = await getUserAuthorization(
       UserRole.ADMINISTRATOR
     );
 

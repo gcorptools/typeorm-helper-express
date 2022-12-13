@@ -1,5 +1,5 @@
 import request from 'supertest';
-import { app, getUserCookie, newCountries, COUNTRIES } from '../index';
+import { app, newCountries, COUNTRIES } from '../index';
 
 describe('Read Countries by ID Route', () => {
   it('should not find unknown country', async () => {

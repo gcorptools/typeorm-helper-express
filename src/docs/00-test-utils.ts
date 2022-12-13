@@ -19,11 +19,13 @@ export const newCountries = async (size: number) =>
     })
   );
 
-export const getUserCookie = async (role: string = UserRole.CUSTOMER) => {
+export const getUserAuthorization = async (
+  role: string = UserRole.CUSTOMER
+) => {
   const userData = {
     id: '1',
     username: 'fake-email@mail.com',
-    role
+    roles: [role]
   };
   const accessToken = newJwtToken(userData, {});
   const token = `Bearer ${accessToken}`;

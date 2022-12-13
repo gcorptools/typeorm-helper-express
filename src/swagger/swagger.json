@@ -331,14 +331,15 @@
       },
       "UserCredentials": {
         "description": "Current user credentials",
-        "required": ["id", "username", "role"],
+        "required": ["id", "username", "roles"],
         "type": "object",
         "properties": {
           "id": { "description": "User's ID", "type": "string" },
           "username": { "description": "User's unique name", "type": "string" },
-          "role": {
+          "roles": {
             "description": "User's associated privileges",
-            "type": "string"
+            "type": "array",
+            "items": { "type": "string" }
           }
         }
       }

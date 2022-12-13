@@ -1,7 +1,7 @@
 import request from 'supertest';
 import {
   app,
-  getUserCookie,
+  getUserAuthorization,
   newCountries,
   COUNTRIES,
   UserRole
@@ -19,7 +19,7 @@ describe('Post Country Route', () => {
   });
 
   it('should not allow invalid data', async () => {
-    const { token } = await getUserCookie();
+    const { token } = await getUserAuthorization();
     let response = await request(app)
       .post(COUNTRIES)
       .set('authorization', token)
@@ -29,7 +29,7 @@ describe('Post Country Route', () => {
       });
     expect(response.status).toEqual(403);
 
-    const { token: administratorToken } = await getUserCookie(
+    const { token: administratorToken } = await getUserAuthorization(
       UserRole.ADMINISTRATOR
     );
     response = await request(app)
@@ -43,7 +43,7 @@ describe('Post Country Route', () => {
   });
 
   it('should allow edit by administrators', async () => {
-    const { token } = await getUserCookie(UserRole.ADMINISTRATOR);
+    const { token } = await getUserAuthorization(UserRole.ADMINISTRATOR);
     const response = await request(app)
       .post(COUNTRIES)
       .set('authorization', token)

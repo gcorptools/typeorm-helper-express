@@ -6,7 +6,7 @@ import {
   Country,
   countryRepository,
   UserRole,
-  getUserCookie
+  getUserAuthorization
 } from '../index';
 
 describe('Delete by IDs Country Route', () => {
@@ -22,7 +22,7 @@ describe('Delete by IDs Country Route', () => {
   });
 
   it('should not allow invalid user', async () => {
-    const { token } = await getUserCookie();
+    const { token } = await getUserAuthorization();
 
     const country = (await newCountries(1))[0];
 
@@ -33,7 +33,7 @@ describe('Delete by IDs Country Route', () => {
 
   it('should allow deletion by administrator', async () => {
     const countries = await newCountries(10);
-    const { token: administratorToken } = await getUserCookie(
+    const { token: administratorToken } = await getUserAuthorization(
       UserRole.ADMINISTRATOR
     );
 

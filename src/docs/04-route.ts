@@ -32,7 +32,7 @@ const administratorOnlyWithDeleted = async (req: Request): Promise<boolean> => {
     return false;
   }
   return (
-    [UserRole.ADMINISTRATOR].includes(currentUser.role) &&
+    currentUser.roles.includes(UserRole.ADMINISTRATOR) &&
     !!req.query?.withDeleted
   );
 };

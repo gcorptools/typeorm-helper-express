@@ -1,7 +1,7 @@
 import request from 'supertest';
 import {
   app,
-  getUserCookie,
+  getUserAuthorization,
   newCountries,
   COUNTRIES,
   UserRole
@@ -20,7 +20,7 @@ describe('Delete by ID Country Route', () => {
   });
 
   it('should not allow invalid user', async () => {
-    const { token } = await getUserCookie();
+    const { token } = await getUserAuthorization();
     const country = (await newCountries(1))[0];
 
     const url = `${COUNTRIES}/${country.id}`;
@@ -29,7 +29,7 @@ describe('Delete by ID Country Route', () => {
   });
 
   it('should allow deletion by administrator', async () => {
-    const { token: administratorToken } = await getUserCookie(
+    const { token: administratorToken } = await getUserAuthorization(
       UserRole.ADMINISTRATOR
     );
     const country = (await newCountries(1))[0];
