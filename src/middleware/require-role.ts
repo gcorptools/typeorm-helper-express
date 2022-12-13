@@ -2,16 +2,17 @@ import { ForbiddenError } from '../errors';
 import { Request, Response, NextFunction } from 'express';
 
 const check = (allowedRoles: any[], userRoles: any[], strict: boolean) => {
-  const safeUserRoles = userRoles || [];
+  const safeAllowedRoles = allowedRoles.map((r: any) => `${r}`);
+  const safeUserRoles = (userRoles || []).map((r: any) => `${r}`);
   if (!strict) {
     // Any user role is allowed
     return safeUserRoles.some((userRole: any) =>
-      allowedRoles.includes(userRole)
+      safeAllowedRoles.includes(userRole)
     );
   }
   // All user roles must be in allowed roles
   return safeUserRoles.every((userRole: any) =>
-    allowedRoles.includes(userRole)
+    safeAllowedRoles.includes(userRole)
   );
 };
 
