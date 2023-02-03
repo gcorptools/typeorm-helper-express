@@ -31,7 +31,7 @@ export const requireRole = (roles: any[], strict: boolean = false): any => {
    */
   return async (req: Request, res: Response, next: NextFunction) => {
     if (!req.currentUser || !check(roles, req.currentUser.roles, strict)) {
-      next(new ForbiddenError());
+      return next(new ForbiddenError());
     }
     return next();
   };

@@ -91,6 +91,7 @@ describe('Dto utils', () => {
     expect(converted.firstName).toEqual(person.firstName);
     expect(converted.lastName).toEqual(person.lastName);
     expect((converted as any).password).toBeUndefined();
+    expect(converted.transformed).toBeUndefined();
 
     // Address
     const address = converted.address;
@@ -146,6 +147,26 @@ describe('Dto utils', () => {
     const pagePerson = await personRepository.findPage({});
     const dtoPagePersons = toDto(PersonDto, pagePerson) as Page<PersonDto>;
     expect(dtoPagePersons.totalElements).toEqual(pagePerson.totalElements);
+
+    // With transform methods and params
+    const value = `${new Date()}`;
+    const transform = (p: Person, transformed: any) => {
+      p.transformed = transformed;
+      return p;
+    };
+
+    const dtoTransformedPersons = toDto(
+      PersonDto,
+      pagePerson,
+      transform,
+      value
+    ) as Page<PersonDto>;
+    expect(dtoTransformedPersons.totalElements).toEqual(
+      pagePerson.totalElements
+    );
+    dtoTransformedPersons.data.forEach((d: PersonDto) => {
+      expect(d.transformed).toEqual(value);
+    });
   });
 
   it('should safely convert to JSON', async () => {
@@ -218,6 +239,8 @@ class Person extends GenericModel {
     eager: true
   })
   cards!: Card[];
+
+  transformed!: any;
 }
 
 @Entity()
@@ -255,6 +278,7 @@ class PersonDto extends GenericDto {
   cards!: CardDto[];
   @mapped((record: any) => record.job.name)
   job!: string;
+  transformed!: any;
 }
 
 class StandardJson extends JsonIgnoreMixins() {
